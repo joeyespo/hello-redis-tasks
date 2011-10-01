@@ -1,0 +1,11 @@
+# Ignore environment-specific files
+logs/*
+instance/*
+
+# Python bytecode files
+*.pyc
+
+# Misc and OS files
+Desktop.ini             # Directory atttributes in Windows.
+Thumbs.db               # Picture thumbnail cache in Windows 98.
+.DS_Store               # Directory attributes in Mac OS X.

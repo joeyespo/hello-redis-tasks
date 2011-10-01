@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Processing{% endblock %}
+{% block additionalscripts %}
+<script src="http://ajax.googleapis.com/ajax/libs/jquery/1.6.2/jquery.min.js"></script>
+<script>
+    function poll_task() {
+        $.getJSON("poll?tid={{ task_id }}", function(data) {
+            if(data && data.ready !== undefined && data.ready !== null) {
+                if(data.progress !== undefined)
+                    $('#progress').text(' (' + data.progress + ')');
+                if(data.ready === true)
+                    window.location.replace("results?tid={{ task_id }}");
+            }
+            else
+                window.location.replace("/");
+            window.setTimeout(poll_task, 500);
+        }).error(function(error) {
+            $('.processing-text').hide();
+            $('.ajax-loader').hide();
+            $('#error-message').html(error.responseText);
+        });
+    }
+    $(document).ready(function() {
+        window.setTimeout(poll_task, 500);
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<article>
+    <p>
+        <span class="processing-text">Processing. <span id="progress">Please wait.</span></span>
+        <img class="ajax-loader" src="{{ url_for('.static', filename='ajax-loader.gif') }}" alt="Pleast wait" width="16" height="16" />
+        <br/>
+        <div id="error-message-container">
+            <div id="error-message"></div>
+        </div>
+    </p>
+</article>
+{% endblock %}

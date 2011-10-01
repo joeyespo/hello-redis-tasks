@@ -1,0 +1,73 @@
+@charset "utf-8";
+
+/* Base styles */
+body {
+    background-color: #cef;
+    font-family: 'Arial' 'Verdana';
+    margin: 0;
+    padding: 0;
+}
+
+h1 {
+    font-size: 2em;
+    color: #222;
+}
+
+.page {
+    background-color: white;
+    color: #333;
+    width: 800px;
+    margin: 24px auto 24px auto;
+    padding: 30px;
+    border: 1px solid #9cd;
+    -moz-box-shadow: 0 0 24px 2px #8bc;
+    -webkit-box-shadow: 0 0 24px 2px #8bc;
+    box-shadow: 0 0 24px 2px #8bc;
+}
+
+#github-banner {
+    position: absolute;
+    top: 0;
+    right: 0;
+    border: 0;
+}
+
+.flashed-messages {
+    border: 1px dotted #888;
+    background-color: #ffe;
+    margin: 0 0 24px 0;
+    padding: 0 24px;
+    color: #333;
+    font-weight: bold;
+}
+.content {
+    padding: 0;
+}
+.content h1 {
+    font-size: 1.5em;
+    color: #222;
+}
+.content-end {
+    clear: both;
+}
+* html .content-end {
+    height:1px;
+}
+
+.error-message {
+    padding: 0 24px 0;
+    border: 1px solid #eaa;
+    background-color: #fdd;
+    color: #533;
+}
+.error-message h1 {
+    color: #533;
+}
+
+.processing-text {
+    float: left;
+}
+.ajax-loader {
+    float: left;
+    margin-left: 8px;
+}

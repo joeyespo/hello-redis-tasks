@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome{% endblock %}
+{% block content %}
+<article class="tasks">
+    <h1>Available Tasks</h1>
+    <ul>
+        <li><a href="add?x=1&y=1">Add 1 + 1</a></li>
+        <li><a href="add?x=1&y=2">Add 1 + 2</a></li>
+        <li><a href="add?x=5&y=6">Add 5 + 6</a></li>
+    </ul>
+    
+    <h1>What?</h1>
+    <p>
+        This is a demo of Hello Redis Tasks, a Python project that uses Redis as a task queue for background work
+        within a Flask website. Click one of the 'Add' links above to simulate work and add the two numbers together in
+        the background. You will see a progress page until the work is complete. Then the result will be presented to you.
+    </p>
+    
+    <h1>How does it work?</h1>
+    <p>
+        Clicking 'Add' will tell the web app to start a new task, then display the progress page. In the code, you'll see
+        that starting a new task is as simple as pushing some data onto a <a href="http://redis.io/">Redis</a> list. The app is then
+        free to complete the web request while the external <strong>worker.py</strong> process does all the work. Meanwhile the processing
+        page, using AJAX, will poll the server until it responds with 'ready=true', to which it redirects you to the results page.
+        <br /><br />
+        
+        Be sure to check out the comments and docstrings in <a href="http://github.com/joeyespo/hello-redis-tasks">the source code</a> for details.
+    </p>
+</article>
+{% endblock %}
