@@ -9,7 +9,7 @@ Go here to see the site in action: [http://hello-redis-tasks.joeyespo.com](http:
 Usage
 -----
 
-**Be sure to have `redis-server` running.**
+Be sure to have `redis-server` running.
 
 When running locally, all you need to do is run `hello_redis_tasks.py` and it will use Flask to serve the
 app and also to run background tasks. In production, you'll also have to run `worker.py` in a separate
