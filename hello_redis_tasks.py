@@ -41,7 +41,11 @@ def add_progress():
 def add_poll():
     """Called by the progress page using AJAX to check whether the task is complete."""
     task_id = request.args.get('tid')
-    task = add.get_task(task_id)
+    try:
+        task = add.get_task(task_id)
+    except ConnectionError:
+        # Return the error message as an HTTP 500 error
+        return 'Coult not connect to the task queue. Check to make sure that <strong>redis-server</strong> is running and try again.', 500
     ready = task.return_value is not None if task else None
     return jsonify(ready=ready)
 
