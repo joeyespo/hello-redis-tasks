@@ -1,0 +1,6 @@
+Hello Redis Tasks TODO
+======================
+
+* Limit the add() simulation time
+- Monitor the worker script and show an error on the processing page when it's down (similar to when the site can't connect to Redis)
+- Add progress reporting by using something other than sleep
