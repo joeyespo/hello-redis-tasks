@@ -40,6 +40,7 @@ h1 {
     color: #333;
     font-weight: bold;
 }
+
 .content {
     padding: 0;
 }
@@ -52,6 +53,15 @@ h1 {
 }
 * html .content-end {
     height:1px;
+}
+
+.progress-error {
+    display: none;
+    visibility: hidden;
+}
+
+.error-text {
+    padding-bottom: 24px;
 }
 
 .error-message {

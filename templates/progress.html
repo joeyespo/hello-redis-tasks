@@ -8,7 +8,7 @@
         $.getJSON("poll?tid={{ task_id }}", function(data) {
             if(data && data.ready !== undefined && data.ready !== null) {
                 if(data.progress !== undefined)
-                    $('#progress').text(' (' + data.progress + ')');
+                    $('#Progress').text(' (' + data.progress + ')');
                 if(data.ready === true)
                     window.location.replace("results?tid={{ task_id }}");
             }
@@ -16,11 +16,12 @@
                 window.location.replace("/");
             window.setTimeout(poll_task, 500);
         }).error(function(error) {
-            $('.processing-text').hide();
-            $('.ajax-loader').hide();
-            $('#error-message').html(error.responseText);
+            $('#Error').html(error.responseText);
+            $('#ErrorContainer').css('visibility', 'visible').fadeIn();
+            $('#ProgressContainer').hide();
         });
     }
+    
     $(document).ready(function() {
         window.setTimeout(poll_task, 500);
     });
@@ -30,11 +31,14 @@
 {% block content %}
 <article>
     <p>
-        <span class="processing-text">Processing. <span id="progress">Please wait.</span></span>
-        <img class="ajax-loader" src="{{ url_for('.static', filename='ajax-loader.gif') }}" alt="Pleast wait" width="16" height="16" />
-        <br/>
-        <div id="error-message-container">
-            <div id="error-message"></div>
+        <div id="ProgressContainer">
+            <span class="processing-text">Processing. <span id="Progress">Please wait.</span></span>
+            <img class="ajax-loader" src="{{ url_for('.static', filename='ajax-loader.gif') }}" alt="Pleast wait" width="16" height="16" />
+            <br/>
+        </div>
+        <div id="ErrorContainer" class="error-message progress-error">
+            <h1>There was a problem</h1>
+            <div id="Error" class="error-text"></div>
         </div>
     </p>
 </article>
