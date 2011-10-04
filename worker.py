@@ -23,14 +23,16 @@ redis = Redis()
 
 class TaskWorker(Thread):
     """A dedicated task worker that runs on a separate thread."""
-    def __init__(self, app=None, port=None, queue_key=None, rv_ttl=None, redis=None, debug=None):
-        Thread.__init__(self)
+    def __init__(self, app=None, port=None, queue_key=None, rv_ttl=None, redis=None, worker_name=None, thread_name=None, debug=None):
+        Thread.__init__(self, name=thread_name)
         self.daemon = True
         self.queue_key = queue_key
         self.port = port
         self.rv_ttl = rv_ttl or 500
         self.redis = redis or Redis()
+        self.worker_name = worker_name or (thread_name if worker_name is None else None)
         self.debug = app.debug if (debug is None and app) else (debug or False)
+        self._worker_prefix = (self.worker_name + ': ') if self.worker_name else ''
         # Try getting the queue key from the specified or current Flask application
         if not self.queue_key:
             if not app and not current_app:
@@ -51,12 +53,12 @@ class TaskWorker(Thread):
     
     def run(self):
         """Runs all current and future tasks."""
-        print ' * Running task worker ("%s")' % self.queue_key
+        print ' * %sRunning task worker ("%s")\n' % (self._worker_prefix, self.queue_key),
         while True:
             try:
                 self.run_task()
             except ConnectionError:
-                print ' * Disconnected, waiting for task queue...'
+                print ' * %sDisconnected, waiting for task queue...\n' % _worker_prefix,
                 while True:
                     try:
                         redis.ping()
@@ -64,20 +66,20 @@ class TaskWorker(Thread):
                         break
                     except ConnectionError:
                         pass
-                print ' * Connected to task queue'
+                print ' * %sConnected to task queue\n' % _worker_prefix,
             except Exception, ex:
-                print format_exc(ex)
+                print '%s%s\n' % (_worker_prefix, format_exc(ex)),
     
     def run_task(self):
         """Runs a single task."""
         msg = self.redis.blpop(self.queue_key)
         func, task_id, args, kwargs = loads(msg[1])
-        print 'Started task: %s(%s%s)' % (str(func.__name__), repr(args)[1:-1], ('**' + repr(kwargs) if kwargs else ''))
+        print '%sStarted task: %s(%s%s)\n' % (_worker_prefix, str(func.__name__), repr(args)[1:-1], ('**' + repr(kwargs) if kwargs else '')),
         try:
             rv = func(*args, **kwargs)
         except Exception, ex:
             rv = ex
-        print '-> Completed: ' + repr(rv)
+        print '%s-> Completed: %s\n' % (_worker_prefix, repr(rv)),
         if rv is not None:
             self.redis.set(task_id, dumps(rv))
             self.redis.expire(task_id, self.rv_ttl)
@@ -127,9 +129,13 @@ def delayable(f):
 if __name__ == '__main__':
     # Run with current app
     from hello_redis_tasks import app
-    worker = TaskWorker(app)
-    worker.start()
+    # It's easy to have multiple workers
+    workers = []
+    for i in range(5):
+        workers.append(TaskWorker(app, worker_name="Worker %d" % i))
+    # Note that this will fail if Redis is not currently running
+    map(lambda w: w.start(), workers)
     # Wait forever, so we can receive KeyboardInterrupt to exit
-    while worker.is_alive():
+    while any(filter(lambda w: w.is_alive(), workers)):
         sleep(1)
     print 'Task worker stopped.'
