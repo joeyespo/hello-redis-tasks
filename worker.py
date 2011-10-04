@@ -58,7 +58,7 @@ class TaskWorker(Thread):
             try:
                 self.run_task()
             except ConnectionError:
-                print ' * %sDisconnected, waiting for task queue...\n' % _worker_prefix,
+                print ' * %sDisconnected, waiting for task queue...\n' % self._worker_prefix,
                 while True:
                     try:
                         redis.ping()
@@ -66,20 +66,20 @@ class TaskWorker(Thread):
                         break
                     except ConnectionError:
                         pass
-                print ' * %sConnected to task queue\n' % _worker_prefix,
+                print ' * %sConnected to task queue\n' % self._worker_prefix,
             except Exception, ex:
-                print '%s%s\n' % (_worker_prefix, format_exc(ex)),
+                print '%s%s\n' % (self._worker_prefix, format_exc(ex)),
     
     def run_task(self):
         """Runs a single task."""
         msg = self.redis.blpop(self.queue_key)
         func, task_id, args, kwargs = loads(msg[1])
-        print '%sStarted task: %s(%s%s)\n' % (_worker_prefix, str(func.__name__), repr(args)[1:-1], ('**' + repr(kwargs) if kwargs else '')),
+        print '%sStarted task: %s(%s%s)\n' % (self._worker_prefix, str(func.__name__), repr(args)[1:-1], ('**' + repr(kwargs) if kwargs else '')),
         try:
             rv = func(*args, **kwargs)
         except Exception, ex:
             rv = ex
-        print '%s-> Completed: %s\n' % (_worker_prefix, repr(rv)),
+        print '%s-> Completed: %s\n' % (self._worker_prefix, repr(rv)),
         if rv is not None:
             self.redis.set(task_id, dumps(rv))
             self.redis.expire(task_id, self.rv_ttl)
