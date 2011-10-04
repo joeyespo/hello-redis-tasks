@@ -12,6 +12,14 @@ h1 {
     font-size: 2em;
     color: #222;
 }
+a {
+    color: #a22;
+    text-decoration: none;
+}
+a:hover {
+    color: #f33;
+    text-decoration: underline;
+}
 
 .page {
     background-color: white;
