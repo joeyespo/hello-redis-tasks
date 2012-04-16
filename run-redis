@@ -1,1 +1,1 @@
-redis-server
+redis-server &> redis.log &
