@@ -138,12 +138,12 @@ if __name__ == '__main__':
     try:
         for i in range(5):
             task_workers.append(TaskWorker(queue_key=queue_key, worker_name="Worker %d" % i))
-            task_workers.start()
     except ConnectionError:
         logger.error('Could not connect to Redis. Be sure Redis is running before starting the worker.')
         sys.exit(1)
     
-    # Wait forever, so we can receive KeyboardInterrupt to exit
+    # Start each worker then wait forever, so we can receive KeyboardInterrupt to exit
+    map(lambda w: w.start(), task_workers)
     while any(filter(lambda w: w.is_alive(), task_workers)):
         sleep(1)
     logger.info(' * Task worker stopped')
