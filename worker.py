@@ -127,15 +127,23 @@ def delayable(f):
 
 # Run dedicated task worker
 if __name__ == '__main__':
-    # Run with current app
+    import sys
+    
+    # Get queue key from app config
     from hello_redis_tasks import app
-    # It's easy to have multiple workers
-    workers = []
-    for i in range(5):
-        workers.append(TaskWorker(app, worker_name="Worker %d" % i))
-    # Note that this will fail if Redis is not currently running
-    map(lambda w: w.start(), workers)
+    queue_key = app.config['REDIS_QUEUE_KEY']
+    
+    # It's easy to have multiple task worker instances
+    task_workers = []
+    try:
+        for i in range(5):
+            task_workers.append(TaskWorker(queue_key=queue_key, worker_name="Worker %d" % i))
+            task_workers.start()
+    except ConnectionError:
+        logger.error('Could not connect to Redis. Be sure Redis is running before starting the worker.')
+        sys.exit(1)
+    
     # Wait forever, so we can receive KeyboardInterrupt to exit
-    while any(filter(lambda w: w.is_alive(), workers)):
+    while any(filter(lambda w: w.is_alive(), task_workers)):
         sleep(1)
-    logger.info('Task worker stopped.')
+    logger.info(' * Task worker stopped')
