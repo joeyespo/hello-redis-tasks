@@ -7,6 +7,7 @@ Run this script or start a TaskWorker instance to run background tasks.
 Initial code can be found here: http://flask.pocoo.org/snippets/73/
 """
 
+import logging
 from threading import Thread
 from pickle import dumps, loads
 from uuid import uuid4
@@ -15,9 +16,8 @@ from time import sleep
 from traceback import format_exc
 from flask import current_app
 
-# TODO: use `logging` instead of `print`
 
-
+logger = logging.getLogger('worker')
 redis = Redis()
 
 
@@ -53,12 +53,12 @@ class TaskWorker(Thread):
     
     def run(self):
         """Runs all current and future tasks."""
-        print ' * %sRunning task worker ("%s")\n' % (self._worker_prefix, self.queue_key),
+        logger.info(' * %sRunning task worker ("%s")', self._worker_prefix, self.queue_key)
         while True:
             try:
                 self.run_task()
             except ConnectionError:
-                print ' * %sDisconnected, waiting for task queue...\n' % self._worker_prefix,
+                logger.error(' * %sDisconnected, waiting for task queue...', self._worker_prefix)
                 while True:
                     try:
                         redis.ping()
@@ -66,20 +66,20 @@ class TaskWorker(Thread):
                         break
                     except ConnectionError:
                         pass
-                print ' * %sConnected to task queue\n' % self._worker_prefix,
+                logger.info(' * %sConnected to task queue', self._worker_prefix)
             except Exception, ex:
-                print '%s%s\n' % (self._worker_prefix, format_exc(ex)),
+                logger.error(self._worker_prefix + format_exc(ex))
     
     def run_task(self):
         """Runs a single task."""
         msg = self.redis.blpop(self.queue_key)
         func, task_id, args, kwargs = loads(msg[1])
-        print '%sStarted task: %s(%s%s)\n' % (self._worker_prefix, str(func.__name__), repr(args)[1:-1], ('**' + repr(kwargs) if kwargs else '')),
+        logger.info('%sStarted task: %s(%s%s)', self._worker_prefix, str(func.__name__), repr(args)[1:-1], ('**' + repr(kwargs) if kwargs else ''))
         try:
             rv = func(*args, **kwargs)
         except Exception, ex:
             rv = ex
-        print '%s-> Completed: %s\n' % (self._worker_prefix, repr(rv)),
+        logger.info('%s-> Completed: %s', self._worker_prefix, repr(rv))
         if rv is not None:
             self.redis.set(task_id, dumps(rv))
             self.redis.expire(task_id, self.rv_ttl)
@@ -138,4 +138,4 @@ if __name__ == '__main__':
     # Wait forever, so we can receive KeyboardInterrupt to exit
     while any(filter(lambda w: w.is_alive(), workers)):
         sleep(1)
-    print 'Task worker stopped.'
+    logger.info('Task worker stopped.')

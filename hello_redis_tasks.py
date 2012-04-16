@@ -4,8 +4,9 @@ Hello Redis Tasks
 A quick example of how to use Redis as a task queue.
 """
 
+import logging.config
 import os
-from redis import Redis, ConnectionError
+from redis import ConnectionError
 from flask import Flask, render_template, abort, request, session, abort, redirect, url_for, flash, jsonify
 from tasks import add
 
@@ -14,6 +15,9 @@ from tasks import add
 app = Flask(__name__)
 app.config['DEBUG'] = __name__ == '__main__'
 app.config.from_pyfile('config.py')
+if 'LOGGING' in app.config:
+    logging.config.dictConfig(app.config['LOGGING'])
+
 
 # Views
 @app.route('/')
