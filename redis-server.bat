@@ -1,3 +1,0 @@
-@ECHO OFF
-
-redis-server
