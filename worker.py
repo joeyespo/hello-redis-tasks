@@ -1,4 +1,3 @@
-#!/usr/bin/env python
 """\
 Worker
 Provides classes and a decorator for using Redis as a task queue.
@@ -18,7 +17,10 @@ from flask import current_app
 
 
 logger = logging.getLogger('worker')
-redis = Redis()
+
+
+def create_redis():
+    return Redis()
 
 
 class TaskWorker(Thread):
@@ -29,7 +31,7 @@ class TaskWorker(Thread):
         self.queue_key = queue_key
         self.port = port
         self.rv_ttl = rv_ttl or 500
-        self.redis = redis or Redis()
+        self.redis = redis or create_redis()
         self.worker_name = worker_name or (thread_name if worker_name is None else None)
         self.debug = app.debug if (debug is None and app) else (debug or False)
         self._worker_prefix = (self.worker_name + ': ') if self.worker_name else ''
@@ -47,7 +49,7 @@ class TaskWorker(Thread):
     def reset(self):
         """Resets the database to an empty task queue."""
         try:
-            redis.flushdb()
+            self.redis.flushdb()
         except ConnectionError:
             pass
     
@@ -61,7 +63,7 @@ class TaskWorker(Thread):
                 logger.error(' * %sDisconnected, waiting for task queue...', self._worker_prefix)
                 while True:
                     try:
-                        redis.ping()
+                        self.redis.ping()
                         sleep(1)
                         break
                     except ConnectionError:
@@ -83,6 +85,9 @@ class TaskWorker(Thread):
         if rv is not None:
             self.redis.set(task_id, dumps(rv))
             self.redis.expire(task_id, self.rv_ttl)
+
+
+redis = create_redis()
 
 
 class Task(object):
@@ -111,11 +116,11 @@ class Task(object):
 def delayable(f):
     """Marks a function as delayable by giving it the 'delay' and 'get_task' members."""
     def delay(*args, **kwargs):
-        queue_key = current_app.config['REDIS_QUEUE_KEY']
+        queue_key = current_app.config.get('REDIS_QUEUE_KEY', 'default')
         task_id = '%s:result:%s' % (queue_key, str(uuid4()))
         s = dumps((f, task_id, args, kwargs))
         redis.set(task_id, '')
-        redis.rpush(current_app.config['REDIS_QUEUE_KEY'], s)
+        redis.rpush(queue_key, s)
         return Task(task_id)
     def get_task(task_id):
         result = Task(task_id)
@@ -131,7 +136,7 @@ if __name__ == '__main__':
     
     # Get queue key from app config
     from hello_redis_tasks import app
-    queue_key = app.config['REDIS_QUEUE_KEY']
+    queue_key = app.config.get('REDIS_QUEUE_KEY', 'default')
     
     # It's easy to have multiple task worker instances
     task_workers = []
@@ -146,4 +151,5 @@ if __name__ == '__main__':
     map(lambda w: w.start(), task_workers)
     while any(filter(lambda w: w.is_alive(), task_workers)):
         sleep(1)
+    
     logger.info(' * Task worker stopped')
