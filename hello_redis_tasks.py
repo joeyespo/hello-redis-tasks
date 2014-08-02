@@ -7,7 +7,7 @@ A quick example of how to use Redis as a task queue.
 import logging.config
 import os
 from redis import ConnectionError
-from flask import Flask, render_template, abort, request, session, abort, redirect, url_for, flash, jsonify
+from flask import Flask, render_template, request, redirect, jsonify
 from tasks import add
 
 
@@ -86,7 +86,8 @@ def connection_error(e):
 # Run dev server
 if __name__ == '__main__':
     # Run both the task queue
-    # TODO: When Flask version 0.8, refactor using the new app.before_first_request()
+    # TODO: When Flask version 0.8, refactor using the new
+    #       app.before_first_request()
     debug = app.config.get('DEBUG', True)
     use_reloader = app.config.get('DEBUG', True)
     if os.environ.get('WERKZEUG_RUN_MAIN') == 'true' or not use_reloader:
@@ -94,4 +95,5 @@ if __name__ == '__main__':
         worker = TaskWorker(app, debug=debug)
         worker.reset()
         worker.start()
-    app.run(host=app.config.get('HOST', 'localhost'), port=app.config.get('PORT', 5000), debug=debug, use_reloader=use_reloader)
+    app.run(host=app.config.get('HOST'), port=app.config.get('PORT'),
+            debug=debug, use_reloader=use_reloader)
