@@ -28,6 +28,10 @@ page, using AJAX, will poll the server until it responds with 'ready=true', to w
 Was this helpful?
 -----------------
 
-I'll be keeping this up to date since it'll be the basis for several upcoming projects. I hope some of you
-can find use out of it too. If you have any suggestions to make it even simpler or more clear, please let me know.
-You can say hello at joeyespo@gmail.com or [reach me on Twitter](http://www.twitter.com/joeyespo).
+If you have any suggestions to make it even simpler or more clear,
+please feel free to [let me know](http://www.twitter.com/joeyespo).
+
+Also, if you find this useful, please consider supporting me on
+<a href="http://gittip.com/joeyespo" title="Thank you!">
+  <img align="center" style="margin-bottom:1px" src="http://joeyespo.com/images/gittip-button.png" alt="Gittip">
+</a>
