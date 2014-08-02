@@ -76,7 +76,7 @@ def page_not_found(e):
 
 
 @app.errorhandler(ConnectionError)
-def page_not_found(e):
+def connection_error(e):
     debug_description = "<strong>redis-server</strong> is"
     production_description = "both <strong>redis-server</strong> and <strong>worker.py</strong> are"
     description = "Check to make sure that %s running." % (debug_description if app.debug else production_description)
