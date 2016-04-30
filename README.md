@@ -3,8 +3,6 @@ Hello Redis Tasks
 
 An example of how to use Redis as a task queue within a Flask web application.
 
-Go here to see the site in action: [http://hello-redis-tasks.joeyespo.com](http://hello-redis-tasks.joeyespo.com/)
-
 
 Usage
 -----
